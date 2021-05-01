@@ -3,7 +3,7 @@ Basic raytracing and rasterization in go + SDL (https://github.com/veandco/go-sd
 
 `cd ray && SDL_RENDER_DRIVER=software go run .`
 
-![first-ray-trace](images/BasicRaytracing.png)
+![first-ray-trace](ray/images/BasicRaytracing.png)
 
 
 ### Basic Concepts
