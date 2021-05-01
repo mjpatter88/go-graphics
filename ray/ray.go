@@ -105,13 +105,13 @@ func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
 
 // X and Y are canvas coordinates
 // (0,0 in middle, -(Width/2), -(Hight/2) in bottom left).
-func putPixel(screen *[windowWidth * windowHeight * 4]byte, r byte, g byte, b byte, x int, y int) {
+func putPixel(screen *[windowWidth * windowHeight * 4]byte, color color, x int, y int) {
 	screenX := (windowWidth / 2) + x
 	screenY := (windowHeight / 2) - y - 1
 	base := (screenY*windowWidth + screenX) * 4
-	screen[base] = r
-	screen[base+1] = g
-	screen[base+2] = b
+	screen[base] = color.r
+	screen[base+1] = color.g
+	screen[base+2] = color.b
 	screen[base+3] = 0xFF
 	screen[0] = 0xFF
 }
@@ -124,7 +124,7 @@ func rayTraceFrame(screen *[windowWidth * windowHeight * 4]byte) {
 		for y := -(windowHeight / 2); y < (windowHeight / 2); y++ {
 			direction := canvasToViewport(x, y)
 			color := traceRay(origin, direction, 1, math.Inf(0))
-			putPixel(screen, color.r, color.g, color.b, x, y)
+			putPixel(screen, color, x, y)
 		}
 	}
 
