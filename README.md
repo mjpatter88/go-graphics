@@ -3,6 +3,8 @@ Basic raytracing and rasterization in go + SDL (https://github.com/veandco/go-sd
 
 `cd ray && SDL_RENDER_DRIVER=software go run .`
 
+![first-ray-trace](images/BasicRaytracing.png)
+
 
 ### Basic Concepts
 * Canvas - a rectangular array of colored pixels.
@@ -54,3 +56,12 @@ We'll consider a ray that originates at the camera, goes through a point in the 
   * t < 0 represents points "behind the eye"
   * t = 1 represents points on the viewport
   * t > 1 represents points behind the viewpoint (these are the ones we care about)
+
+### Lessons Learned
+* The canvas and computer screen coordinate system conversion can be tricky. I initially used the following simple formulas:
+    * Sx = Cw/2 + Cx
+    * Sy = Cy/2 - Cy
+* Mistake 1: I missed the subtraction sign in the second one. My scene rendered, but it was upside down.
+* Mistake 2: I fixed the minus sign, then I hit an array out of bounds. You actually have to subtract 1.
+* It's hard to visualize, but it actually makes sense. The loop I was using went from -Y to Y-1 (due to less than comparison).
+* Once I flipped to subtraction, then I had a mismatch on my bounds and thus the overflow.
