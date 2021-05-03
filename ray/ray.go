@@ -10,12 +10,35 @@ type vec3 struct {
 	z float64
 }
 
+func vec3Scale(vec vec3, factor float64) vec3 {
+	return vec3{
+		x: vec.x * factor,
+		y: vec.y * factor,
+		z: vec.z * factor,
+	}
+}
+
+func vec3Len(vec vec3) float64 {
+	return math.Sqrt((vec.x*vec.x + vec.y*vec.y + vec.z*vec.z))
+}
+
+func vec3Add(first vec3, second vec3) vec3 {
+	return vec3{first.x + second.x, first.y + second.y, first.z + second.z}
+}
+
 func vec3Sub(first vec3, second vec3) vec3 {
 	return vec3{first.x - second.x, first.y - second.y, first.z - second.z}
 }
 
 func vec3Dot(first vec3, second vec3) float64 {
 	return (first.x * second.x) + (first.y * second.y) + (first.z * second.z)
+}
+func scaleColor(col color, factor float64) color {
+	return color{
+		r: byte(float64(col.r) * factor),
+		g: byte(float64(col.g) * factor),
+		b: byte(float64(col.b) * factor),
+	}
 }
 
 type color struct {
@@ -49,8 +72,9 @@ var backgroundColor = color{0xFF, 0xFF, 0xFF}
 var sphere1 = sphere{vec3{0, -1, 3}, 1, color{255, 0, 0}}
 var sphere2 = sphere{vec3{2, 0, 4}, 1, color{0, 0, 255}}
 var sphere3 = sphere{vec3{-2, 0, 4}, 1, color{0, 255, 0}}
+var sphere4 = sphere{vec3{0, -5001, 0}, 5000, color{255, 255, 0}}
 
-var shapes = [...]sphere{sphere1, sphere2, sphere3}
+var shapes = [...]sphere{sphere1, sphere2, sphere3, sphere4}
 
 func canvasToViewport(x int, y int) vec3 {
 	vx := (float64(x) * float64(viewportWidth) / float64(windowWidth))
@@ -81,7 +105,7 @@ func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
 	closestT := math.Inf(0)
 	var closestSphere *sphere = nil
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < len(shapes); i++ {
 		sp := shapes[i]
 		sols := intersectRaySphere(origin, direction, sp)
 		t1 := sols.first
@@ -99,7 +123,10 @@ func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
 	if closestSphere == nil {
 		return backgroundColor
 	}
-	return closestSphere.color
+	position := vec3Add(origin, vec3Scale(direction, closestT))
+	normal := vec3Sub(position, closestSphere.center)
+	normal = vec3Scale(normal, 1/vec3Len(normal))
+	return scaleColor(closestSphere.color, computeLighting(position, normal))
 
 }
 

@@ -1,9 +1,13 @@
 # go-graphics
 Basic raytracing and rasterization in go + SDL (https://github.com/veandco/go-sdl2).
 
+My notes as I work through [Computer Graphics from Scratch](https://gabrielgambetta.com/computer-graphics-from-scratch/)
+
 `cd ray && SDL_RENDER_DRIVER=software go run .`
 
 ![first-ray-trace](ray/images/BasicRaytracing.png)
+![diffuse-reflection](ray/images/DiffuseReflection.png)
+
 
 
 ### Basic Concepts
@@ -16,7 +20,7 @@ Basic raytracing and rasterization in go + SDL (https://github.com/veandco/go-sd
   * Y is up, X and Z are horizontal
 
 
-## Ray Tracing
+# Ray Tracing
 
 ### Coordinate Conversion
 * Camera Position = "O" = (0,0,0)
@@ -65,3 +69,28 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 * Mistake 2: I fixed the minus sign, then I hit an array out of bounds. You actually have to subtract 1.
 * It's hard to visualize, but it actually makes sense. The loop I was using went from -Y to Y-1 (due to less than comparison).
 * Once I flipped to subtraction, then I had a mismatch on my bounds and thus the overflow.
+
+## Light
+* Assumptions
+  * All light is white (i => intensity of the light)
+  * Ignore the atmosphere
+* Types of Light Sources
+  * Point Lights - defined by position and intensity
+  * Directional Lights - defined by a direction and intensity
+  * Ambient Light - defined by intensity
+* Types of Objects
+  * Matte -> Use diffuse reflection technique
+  * Shiny -> Use specular reflection technique
+
+* Basic approach
+  * For each point, compute the amount of light from each light source and sum. Multiply this value by the color to get the final color.
+
+### Diffuse Reflection
+* Normal Vector - a unit vector perpendicular to the surface at a point. Call this normal N.
+* Diffuse Reflection Equation (Complicated, but basically the sum of the following)
+  * The intensity of the ambient light 
+  * <N,L> / N x L for all directional and point lights
+
+### Sphere Normals
+* The Normal vector of any point of a sphere lies on a line that goes through the center of the sphere.
+* Thus, N = (P-C) / |P-C| - we divide it by its own length so the result has a length of 1.
