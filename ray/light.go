@@ -32,7 +32,7 @@ func computeLighting(position vec3, normal vec3) float64 {
 	intensity := 0.0
 	for i := 0; i < len(lights); i++ {
 		light := lights[i]
-		if light.lightType == "ambinent" {
+		if light.lightType == "ambient" {
 			intensity += light.intensity
 		} else {
 			var lightDirection vec3

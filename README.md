@@ -6,7 +6,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 `cd ray && SDL_RENDER_DRIVER=software go run .`
 
 ![first-ray-trace](ray/images/BasicRaytracing.png)
-![diffuse-reflection](ray/images/DiffuseReflection.png)
+![diffuse-reflection](ray/images/DiffuseReflection2.png)
 
 
 
@@ -94,3 +94,13 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 ### Sphere Normals
 * The Normal vector of any point of a sphere lies on a line that goes through the center of the sphere.
 * Thus, N = (P-C) / |P-C| - we divide it by its own length so the result has a length of 1.
+
+
+
+
+## Problems!
+
+When building my initial lighting, I ended up with a scene that was mostly correct but a bit too dark:
+![diffuse-reflection-dark](ray/images/DiffuseReflection.png)
+
+The problem ended up being a typo that prevented the ambient light from having any effect at all. After fix this, things matched the output from the book.
