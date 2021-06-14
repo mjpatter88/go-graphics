@@ -33,11 +33,19 @@ func vec3Sub(first vec3, second vec3) vec3 {
 func vec3Dot(first vec3, second vec3) float64 {
 	return (first.x * second.x) + (first.y * second.y) + (first.z * second.z)
 }
+
+func vec3Neg(vec vec3) vec3 {
+	return vec3{-vec.x, -vec.y, -vec.z}
+}
+
 func scaleColor(col color, factor float64) color {
+	newR := float64(col.r) * factor
+	newG := float64(col.g) * factor
+	newB := float64(col.b) * factor
 	return color{
-		r: byte(float64(col.r) * factor),
-		g: byte(float64(col.g) * factor),
-		b: byte(float64(col.b) * factor),
+		r: byte(math.Min(255, newR)),
+		g: byte(math.Min(255, newG)),
+		b: byte(math.Min(255, newB)),
 	}
 }
 
@@ -51,6 +59,7 @@ type sphere struct {
 	center vec3
 	radius float64
 	color  color
+	specular int // -1 represents matte object
 }
 
 type solutions struct {
@@ -69,10 +78,10 @@ const distCameraToProjectionPlane float64 = 1
 
 var backgroundColor = color{0xFF, 0xFF, 0xFF}
 
-var sphere1 = sphere{vec3{0, -1, 3}, 1, color{255, 0, 0}}
-var sphere2 = sphere{vec3{2, 0, 4}, 1, color{0, 0, 255}}
-var sphere3 = sphere{vec3{-2, 0, 4}, 1, color{0, 255, 0}}
-var sphere4 = sphere{vec3{0, -5001, 0}, 5000, color{255, 255, 0}}
+var sphere1 = sphere{vec3{0, -1, 3}, 1, color{255, 0, 0}, 500}
+var sphere2 = sphere{vec3{2, 0, 4}, 1, color{0, 0, 255}, 500}
+var sphere3 = sphere{vec3{-2, 0, 4}, 1, color{0, 255, 0}, 10}
+var sphere4 = sphere{vec3{0, -5001, 0}, 5000, color{255, 255, 0}, 1000}
 
 var shapes = [...]sphere{sphere1, sphere2, sphere3, sphere4}
 
@@ -126,7 +135,7 @@ func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
 	position := vec3Add(origin, vec3Scale(direction, closestT))
 	normal := vec3Sub(position, closestSphere.center)
 	normal = vec3Scale(normal, 1/vec3Len(normal))
-	return scaleColor(closestSphere.color, computeLighting(position, normal))
+	return scaleColor(closestSphere.color, computeLighting(position, normal, vec3Neg(direction), closestSphere.specular))
 
 }
 

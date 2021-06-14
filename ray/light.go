@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 type light struct {
 	lightType string
 	intensity float64
@@ -28,7 +30,8 @@ var light3 = light{
 
 var lights = [...]light{light1, light2, light3}
 
-func computeLighting(position vec3, normal vec3) float64 {
+// v is the vector from the point to the camera.
+func computeLighting(position vec3, normal vec3, v vec3, s int) float64 {
 	intensity := 0.0
 	for i := 0; i < len(lights); i++ {
 		light := lights[i]
@@ -42,9 +45,22 @@ func computeLighting(position vec3, normal vec3) float64 {
 				lightDirection = light.direction
 			}
 
+			// Diffuse
 			normalDotLight := vec3Dot(normal, lightDirection)
 			if normalDotLight > 0 {
 				intensity += light.intensity * normalDotLight / (vec3Len(normal) * vec3Len(lightDirection))
+			}
+
+			// Specular
+			if s != -1 {
+				var reflectionDirection vec3
+				scale := 2 * normalDotLight
+				reflectionDirection = vec3Sub(vec3Scale(normal, scale), lightDirection)
+				reflectionDotV := vec3Dot(reflectionDirection, v)
+				if reflectionDotV > 0 {
+					cosVal := reflectionDotV / (vec3Len(reflectionDirection) * vec3Len(v))
+					intensity += light.intensity * math.Pow(cosVal, float64(s))
+				}
 			}
 		}
 	}

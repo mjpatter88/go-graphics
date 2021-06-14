@@ -7,6 +7,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 
 ![first-ray-trace](ray/images/BasicRaytracing.png)
 ![diffuse-reflection](ray/images/DiffuseReflection2.png)
+![specular-reflection](ray/images/SpecularReflection.png)
 
 
 
@@ -95,6 +96,14 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 * The Normal vector of any point of a sphere lies on a line that goes through the center of the sphere.
 * Thus, N = (P-C) / |P-C| - we divide it by its own length so the result has a length of 1.
 
+### Specular Reflection
+* Use this approach for shiny objects.
+* Shiny objects exhibit bright spots whose location depends on your point of view.
+* The approach used here isn't based on physical reality. It's used because it looks good and is easy to compute.
+* The heart of the equation is simply cos(x). However, we also use a "specular exponent" to control the shininess of the object.
+* We can add specular reflection to our previous light equation making sure to only apply it when positive and with shiny objects.
+* V is the vector from the point to the camera.
+
 
 
 
@@ -103,4 +112,8 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 When building my initial lighting, I ended up with a scene that was mostly correct but a bit too dark:
 ![diffuse-reflection-dark](ray/images/DiffuseReflection.png)
 
-The problem ended up being a typo that prevented the ambient light from having any effect at all. After fix this, things matched the output from the book.
+The problem ended up being a typo that prevented the ambient light from having any effect at all. After I fixed this, things matched the output from the book.
+
+When building the specular reflection implementation, I ended up with a strange artifact: ![specular-reflection-problem](ray/images/SpecularReflectionProblem.png)
+
+The problem is that the values were overflowing the color bytes and wrapping around to become dark. The fix is to clamp the resulted value to the max value of one byte (255).
