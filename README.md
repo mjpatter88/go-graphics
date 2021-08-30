@@ -8,6 +8,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 ![first-ray-trace](ray/images/BasicRaytracing.png)
 ![diffuse-reflection](ray/images/DiffuseReflection2.png)
 ![specular-reflection](ray/images/SpecularReflection.png)
+![shadows](ray/images/Shadows.png)
 
 
 
