@@ -104,7 +104,9 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 * We can add specular reflection to our previous light equation making sure to only apply it when positive and with shiny objects.
 * V is the vector from the point to the camera.
 
-
+## Shadows and Reflections
+* We need to take a more global view and consider other objects in the scene along with the light source. 
+* Basically we want to say "If there is an object between the point and the light source, don't illuminate the point with that light."
 
 
 ## Problems!

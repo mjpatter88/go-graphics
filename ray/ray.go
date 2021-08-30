@@ -56,9 +56,9 @@ type color struct {
 }
 
 type sphere struct {
-	center vec3
-	radius float64
-	color  color
+	center   vec3
+	radius   float64
+	color    color
 	specular int // -1 represents matte object
 }
 
@@ -67,7 +67,7 @@ type solutions struct {
 	second float64
 }
 
-// Try to render at roughly 60 fps
+// Cap rendering at roughly 60 fps
 const msPerFrame = 16
 
 const windowWidth int = 1000
@@ -110,7 +110,7 @@ func intersectRaySphere(origin vec3, direction vec3, sp sphere) solutions {
 	return solutions{t1, t2}
 }
 
-func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
+func closestIntersection(origin vec3, direction vec3, tMin float64, tMax float64) (*sphere, float64) {
 	closestT := math.Inf(0)
 	var closestSphere *sphere = nil
 
@@ -127,8 +127,13 @@ func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
 			closestT = t2
 			closestSphere = &sp
 		}
-
 	}
+	return closestSphere, closestT
+}
+
+func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
+	closestSphere, closestT := closestIntersection(origin, direction, tMin, tMax)
+
 	if closestSphere == nil {
 		return backgroundColor
 	}
