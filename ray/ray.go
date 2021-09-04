@@ -49,6 +49,17 @@ func scaleColor(col color, factor float64) color {
 	}
 }
 
+func sumColors(col1 color, col2 color) color {
+	newR := float64(col1.r) + float64(col2.r)
+	newG := float64(col1.g) + float64(col2.g)
+	newB := float64(col1.b) + float64(col2.b)
+	return color{
+		r: byte(math.Min(255, newR)),
+		g: byte(math.Min(255, newG)),
+		b: byte(math.Min(255, newB)),
+	}
+}
+
 type color struct {
 	r byte
 	g byte
@@ -56,10 +67,11 @@ type color struct {
 }
 
 type sphere struct {
-	center   vec3
-	radius   float64
-	color    color
-	specular int // -1 represents matte object
+	center     vec3
+	radius     float64
+	color      color
+	specular   int     // -1 represents matte object
+	reflective float64 // 0 = not reflective, 1 = completely reflective
 }
 
 type solutions struct {
@@ -76,12 +88,12 @@ const viewportWidth int = 1
 const viewportHeight int = 1
 const distCameraToProjectionPlane float64 = 1
 
-var backgroundColor = color{0xFF, 0xFF, 0xFF}
+var backgroundColor = color{0x00, 0x00, 0x00}
 
-var sphere1 = sphere{vec3{0, -1, 3}, 1, color{255, 0, 0}, 500}
-var sphere2 = sphere{vec3{2, 0, 4}, 1, color{0, 0, 255}, 500}
-var sphere3 = sphere{vec3{-2, 0, 4}, 1, color{0, 255, 0}, 10}
-var sphere4 = sphere{vec3{0, -5001, 0}, 5000, color{255, 255, 0}, 1000}
+var sphere1 = sphere{vec3{0, -1, 3}, 1, color{255, 0, 0}, 500, 0.2}
+var sphere2 = sphere{vec3{2, 0, 4}, 1, color{0, 0, 255}, 500, 0.3}
+var sphere3 = sphere{vec3{-2, 0, 4}, 1, color{0, 255, 0}, 10, 0.4}
+var sphere4 = sphere{vec3{0, -5001, 0}, 5000, color{255, 255, 0}, 1000, 0.5}
 
 var shapes = [...]sphere{sphere1, sphere2, sphere3, sphere4}
 
@@ -131,7 +143,13 @@ func closestIntersection(origin vec3, direction vec3, tMin float64, tMax float64
 	return closestSphere, closestT
 }
 
-func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
+func calculateReflectedRay(ray vec3, normal vec3) vec3 {
+	dotProduct := vec3Dot(normal, ray)
+	scaledNormal := vec3Scale(normal, 2*dotProduct)
+	return vec3Sub(scaledNormal, ray)
+}
+
+func traceRay(origin vec3, direction vec3, tMin float64, tMax float64, recursionDepth int) color {
 	closestSphere, closestT := closestIntersection(origin, direction, tMin, tMax)
 
 	if closestSphere == nil {
@@ -140,8 +158,20 @@ func traceRay(origin vec3, direction vec3, tMin float64, tMax float64) color {
 	position := vec3Add(origin, vec3Scale(direction, closestT))
 	normal := vec3Sub(position, closestSphere.center)
 	normal = vec3Scale(normal, 1/vec3Len(normal))
-	return scaleColor(closestSphere.color, computeLighting(position, normal, vec3Neg(direction), closestSphere.specular))
+	localColor := scaleColor(closestSphere.color, computeLighting(position, normal, vec3Neg(direction), closestSphere.specular))
 
+	// Handle reflections
+	reflectiveness := closestSphere.reflective
+	if reflectiveness <= 0 || recursionDepth <= 0 {
+		return localColor
+	}
+
+	reflectedRay := calculateReflectedRay(vec3Neg(direction), normal)
+	reflectedColor := traceRay(position, reflectedRay, 0.001, math.Inf(0), recursionDepth-1)
+
+	localColorContribution := scaleColor(localColor, 1-reflectiveness)
+	reflectedColorContribution := scaleColor(reflectedColor, reflectiveness)
+	return sumColors(localColorContribution, reflectedColorContribution)
 }
 
 // X and Y are canvas coordinates
@@ -157,14 +187,14 @@ func putPixel(screen *[windowWidth * windowHeight * 4]byte, color color, x int, 
 	screen[0] = 0xFF
 }
 
-func rayTraceFrame(screen *[windowWidth * windowHeight * 4]byte) {
+func rayTraceFrame(screen *[windowWidth * windowHeight * 4]byte, recursionDepth int) {
 
 	var origin = vec3{0, 0, 0}
 
 	for x := -(windowWidth / 2); x < (windowWidth / 2); x++ {
 		for y := -(windowHeight / 2); y < (windowHeight / 2); y++ {
 			direction := canvasToViewport(x, y)
-			color := traceRay(origin, direction, 1, math.Inf(0))
+			color := traceRay(origin, direction, 1, math.Inf(0), recursionDepth)
 			putPixel(screen, color, x, y)
 		}
 	}

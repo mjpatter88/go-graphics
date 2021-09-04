@@ -7,6 +7,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+const recursionDepth = 3
+
 func main() {
 	window, renderer := initialize()
 	tex, err := renderer.CreateTexture(
@@ -55,7 +57,7 @@ func main() {
 		}
 		handleInput(sdl.GetKeyboardState())
 		clearFrame(renderer)
-		rayTraceFrame(&screen)
+		rayTraceFrame(&screen, recursionDepth)
 		drawFrame(renderer, tex, &screen)
 		frameCount++
 
