@@ -9,6 +9,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 ![diffuse-reflection](ray/images/DiffuseReflection2.png)
 ![specular-reflection](ray/images/SpecularReflection.png)
 ![shadows](ray/images/Shadows.png)
+![reflections](ray/images/Reflections.png)
 
 
 
@@ -107,7 +108,11 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 
 ## Shadows and Reflections
 * We need to take a more global view and consider other objects in the scene along with the light source. 
-* Basically we want to say "If there is an object between the point and the light source, don't illuminate the point with that light."
+* For shadows: Basically we want to say "If there is an object between the point and the light source, don't illuminate the point with that light."
+* For reflections: Basically we need to recursively trace a reflected ray (up to a certain depth) for any mirror surface.
+* Rays of light are reflected symmetrically with respect to the surface normal.
+* Reflectiveness isn't all or nothing, so we'll assign a number between 0 and 1 to every surface representing it's reflectiveness.
+* We also have to make the background black so that all the colors don't get washed out due to the influence of white reflections.
 
 
 ## Problems!
