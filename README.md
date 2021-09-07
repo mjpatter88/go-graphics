@@ -10,6 +10,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 ![specular-reflection](ray/images/SpecularReflection.png)
 ![shadows](ray/images/Shadows.png)
 ![reflections](ray/images/Reflections.png)
+![camera-position](ray/images/CameraPosition.png)
 
 
 
@@ -114,6 +115,10 @@ We'll consider a ray that originates at the camera, goes through a point in the 
 * Reflectiveness isn't all or nothing, so we'll assign a number between 0 and 1 to every surface representing it's reflectiveness.
 * We also have to make the background black so that all the colors don't get washed out due to the influence of white reflections.
 
+## Camera Position and Rotation
+* In order to support arbitrary camera positions and orientations, we have to make two simple changes.
+* First, we simply pass in the camera position rather than (0,0,0) as the origin.
+* Second, we multiply our existing direction vector by a matrix representing the camera's orientation.
 
 ## Problems!
 

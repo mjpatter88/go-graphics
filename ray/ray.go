@@ -38,6 +38,16 @@ func vec3Neg(vec vec3) vec3 {
 	return vec3{-vec.x, -vec.y, -vec.z}
 }
 
+func directionMatrixMultiplication(mat [3][3]float64, dir vec3) vec3 {
+	var result vec3
+
+	result.x = (mat[0][0] * dir.x) + (mat[0][1] * dir.y) + (mat[0][2] * dir.z)
+	result.y = (mat[1][0] * dir.x) + (mat[1][1] * dir.y) + (mat[1][2] * dir.z)
+	result.z = (mat[2][0] * dir.x) + (mat[2][1] * dir.y) + (mat[2][2] * dir.z)
+
+	return result
+}
+
 func scaleColor(col color, factor float64) color {
 	newR := float64(col.r) * factor
 	newG := float64(col.g) * factor
@@ -189,12 +199,18 @@ func putPixel(screen *[windowWidth * windowHeight * 4]byte, color color, x int, 
 
 func rayTraceFrame(screen *[windowWidth * windowHeight * 4]byte, recursionDepth int) {
 
-	var origin = vec3{0, 0, 0}
+	// var origin = vec3{0, 0, 0}
+	var cameraPosition = vec3{3, 0, 1}
+	var cameraOrientation = [3][3]float64{
+		{0.7071, 0, -0.7071},
+		{0, 1, 0},
+		{0.7071, 0, 0.7071},
+	}
 
 	for x := -(windowWidth / 2); x < (windowWidth / 2); x++ {
 		for y := -(windowHeight / 2); y < (windowHeight / 2); y++ {
-			direction := canvasToViewport(x, y)
-			color := traceRay(origin, direction, 1, math.Inf(0), recursionDepth)
+			direction := directionMatrixMultiplication(cameraOrientation, canvasToViewport(x, y))
+			color := traceRay(cameraPosition, direction, 1, math.Inf(0), recursionDepth)
 			putPixel(screen, color, x, y)
 		}
 	}
