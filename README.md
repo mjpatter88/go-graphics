@@ -5,13 +5,13 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 
 `cd ray && SDL_RENDER_DRIVER=software go run .`
 
-![first-ray-trace](ray/images/BasicRaytracing.png)
-![diffuse-reflection](ray/images/DiffuseReflection2.png)
-![specular-reflection](ray/images/SpecularReflection.png)
-![shadows](ray/images/Shadows.png)
-![reflections](ray/images/Reflections.png)
-![camera-position](ray/images/CameraPosition.png)
-
+## Ray Tracing
+<img src="ray/images/BasicRaytracing.png" width="250"></img>
+<img src="ray/images/DiffuseReflection2.png" width="250"></img>
+<img src="ray/images/SpecularReflection.png" width="250"></img>
+<img src="ray/images/Shadows.png" width="250"></img>
+<img src="ray/images/Reflections.png" width="250"></img>
+<img src="ray/images/CameraPosition.png" width="250"></img>
 
 
 ### Basic Concepts
