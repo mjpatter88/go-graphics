@@ -130,3 +130,8 @@ The problem ended up being a typo that prevented the ambient light from having a
 When building the specular reflection implementation, I ended up with a strange artifact: ![specular-reflection-problem](ray/images/SpecularReflectionProblem.png)
 
 The problem is that the values were overflowing the color bytes and wrapping around to become dark. The fix is to clamp the resulted value to the max value of one byte (255).
+
+# Rasterization
+
+Rasterization favors performance over purity/accuracy. Rather than attempting to process every pixel in the viewport, rasterization processes each object in the scene. 
+
