@@ -15,6 +15,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 
 ## Rasterization
 <img src="raster/images/BasicLines.png" width="250"></img>
+<img src="raster/images/BetterLines.png" width="250"></img>
 
 
 
