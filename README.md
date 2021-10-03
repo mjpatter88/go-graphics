@@ -16,6 +16,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 ## Rasterization
 <img src="raster/images/BasicLines.png" width="250"></img>
 <img src="raster/images/BetterLines.png" width="250"></img>
+<img src="raster/images/WireframeTriangle.png" width="250"></img>
 
 
 
@@ -146,3 +147,6 @@ Drawing a line is actually surprisingly difficult. Start with the basic formula 
 We can use this to write a function that draws a line from one point to another.
 
 To improve our line drawing, we can apply a general linear interpolation function to either x or y based on if the line is closer to horizontal or vertical.
+
+### Triangles
+Wireframe triangles can be drawn by simply drawing three lines, one for each of the edges.

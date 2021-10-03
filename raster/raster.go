@@ -37,9 +37,7 @@ func rasterizeFrame(screen *[windowWidth * windowHeight * 4]byte) {
 		}
 	}
 
-	drawLine(screen[:], color{0xff, 0x00, 0x00}, point{-200, -200}, point{240, 120})
-	drawLine(screen[:], color{0x00, 0xff, 0x00}, point{-50, -200}, point{60, 240})
-	drawLine(screen[:], color{0x00, 0x00, 0xff}, point{50, -200}, point{-30, 240})
+	drawWireframeTriangle(screen[:], color{0xff, 0x00, 0xff}, point{-200, -250}, point{200, 50}, point{20, 250})
 }
 
 func drawLine(screen []byte, color color, start point, end point) {
@@ -66,6 +64,13 @@ func drawLine(screen []byte, color color, start point, end point) {
 		}
 
 	}
+}
+
+func drawWireframeTriangle(screen []byte, color color, p0, p1, p2 point) {
+	drawLine(screen, color, p0, p1)
+	drawLine(screen, color, p1, p2)
+	drawLine(screen, color, p2, p0)
+
 }
 
 func swap(x point, y point) (point, point) {
