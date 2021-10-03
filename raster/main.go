@@ -108,7 +108,7 @@ func initialize() (*sdl.Window, *sdl.Renderer) {
 	if err != nil {
 		panic(err)
 	}
-	window.SetTitle("Go Ray Tracing")
+	window.SetTitle("Go Rasterization")
 	if err != nil {
 		panic(err)
 	}

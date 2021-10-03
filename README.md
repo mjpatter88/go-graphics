@@ -13,6 +13,10 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 <img src="ray/images/Reflections.png" width="250"></img>
 <img src="ray/images/CameraPosition.png" width="250"></img>
 
+## Rasterization
+<img src="raster/images/BasicLines.png" width="250"></img>
+
+
 
 ### Basic Concepts
 * Canvas - a rectangular array of colored pixels.
@@ -135,3 +139,7 @@ The problem is that the values were overflowing the color bytes and wrapping aro
 
 Rasterization favors performance over purity/accuracy. Rather than attempting to process every pixel in the viewport, rasterization processes each object in the scene. 
 
+### Lines
+Drawing a line is actually surprisingly difficult. Start with the basic formula y = a*x + b. This works for any line other than a strictly vertical one, so we'll ignore those for now.
+
+We can use this to write a function that draws a line from one point to another.
