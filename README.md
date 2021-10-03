@@ -143,3 +143,5 @@ Rasterization favors performance over purity/accuracy. Rather than attempting to
 Drawing a line is actually surprisingly difficult. Start with the basic formula y = a*x + b. This works for any line other than a strictly vertical one, so we'll ignore those for now.
 
 We can use this to write a function that draws a line from one point to another.
+
+To improve our line drawing, we can apply a general linear interpolation function to either x or y based on if the line is closer to horizontal or vertical.

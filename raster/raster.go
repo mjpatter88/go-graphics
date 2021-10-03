@@ -7,8 +7,8 @@ type color struct {
 }
 
 type point struct {
-	x float64
-	y float64
+	x int
+	y int
 }
 
 const windowWidth int = 1000
@@ -39,15 +39,67 @@ func rasterizeFrame(screen *[windowWidth * windowHeight * 4]byte) {
 
 	drawLine(screen[:], color{0xff, 0x00, 0x00}, point{-200, -200}, point{240, 120})
 	drawLine(screen[:], color{0x00, 0xff, 0x00}, point{-50, -200}, point{60, 240})
+	drawLine(screen[:], color{0x00, 0x00, 0xff}, point{50, -200}, point{-30, 240})
 }
 
 func drawLine(screen []byte, color color, start point, end point) {
-	slope := (end.y - start.y) / (end.x - start.x)
-	y := start.y
+	if abs(end.x-start.x) > abs(end.y-start.y) {
+		// line is more horizontal than vertical
+		if start.x > end.x {
+			// Always start at the leftmost point
+			start, end = swap(start, end)
+		}
 
-	for x := start.x; x <= end.x; x++ {
-		putPixel(screen, color, int(x), int(y))
-		y += slope
+		yValues := interpolate(start.x, start.y, end.x, end.y)
+		for x := start.x; x <= end.x; x++ {
+			putPixel(screen, color, x, int(yValues[x-start.x]))
+		}
+	} else {
+		// line is more vertical than horizontal
+		if start.y > end.y {
+			// Always start at the bottom point
+			start, end = swap(start, end)
+		}
+		xValues := interpolate(start.y, start.x, end.y, end.x)
+		for y := start.y; y <= end.y; y++ {
+			putPixel(screen, color, int(xValues[y-start.y]), y)
+		}
+
+	}
+}
+
+func swap(x point, y point) (point, point) {
+	return y, x
+}
+
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+
+}
+
+// Calculate a series of values for a dependent variable by stepping betwween the start
+// and end of an independent variable.
+//
+// Example: Given the start and end points of a line, return the series of y values
+// calculated by stepping from x start to x end.
+func interpolate(iStart int, dStart int, iEnd int, dEnd int) []float64 {
+	// If there is only one point
+	if iStart == iEnd {
+		return []float64{float64(dStart)}
 	}
 
+	values := make([]float64, (iEnd-iStart)+1)
+
+	slope := float64(dEnd-dStart) / float64(iEnd-iStart)
+	d := float64(dStart)
+
+	for i := iStart; i <= iEnd; i++ {
+		values[(i - iStart)] = d
+		d += slope
+	}
+
+	return values
 }
