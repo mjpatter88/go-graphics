@@ -18,6 +18,7 @@ My notes as I work through [Computer Graphics from Scratch](https://gabrielgambe
 <img src="raster/images/BetterLines.png" width="250"></img>
 <img src="raster/images/WireframeTriangle.png" width="250"></img>
 <img src="raster/images/FilledTriangle.png" width="250"></img>
+<img src="raster/images/ShadedTriangle.png" width="250"></img>
 
 
 
@@ -153,3 +154,5 @@ To improve our line drawing, we can apply a general linear interpolation functio
 Wireframe triangles can be drawn by simply drawing three lines, one for each of the edges.
 
 Filled triangles require more work. First, we sort the points in order of bottom to top. Then we get two sets of x coordinates, one for the left side and one for the right side. One of the sets is the side from the bottom point to the top, and the other is a combination of the other two sides with the overlap removed. Then we draw horizontal lines from the left x to the right x for each y value between the bottom and the top.
+
+Shaded triangles can be drawn by applying the existing interpolations techniques to hue/intensity values assigned to each vertex.

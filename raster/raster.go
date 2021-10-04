@@ -1,5 +1,9 @@
 package main
 
+import (
+	"math"
+)
+
 type color struct {
 	r byte
 	g byte
@@ -9,6 +13,12 @@ type color struct {
 type point struct {
 	x int
 	y int
+}
+
+type vert struct {
+	x int
+	y int
+	h float64
 }
 
 const windowWidth int = 1000
@@ -37,8 +47,82 @@ func rasterizeFrame(screen *[windowWidth * windowHeight * 4]byte) {
 		}
 	}
 
-	drawTriangle(screen[:], color{0x99, 0xB8, 0x98}, point{-200, -250}, point{200, 50}, point{20, 250})
-	drawWireframeTriangle(screen[:], color{0xe8, 0x4a, 0x5f}, point{-200, -250}, point{200, 50}, point{20, 250})
+	v1 := vert{-200, -250, 0.5}
+	v2 := vert{200, 50, 0.0}
+	v3 := vert{20, 250, 1.0}
+	drawShadedTriangle(screen[:], color{0xe8, 0x4a, 0x5f}, v1, v2, v3)
+}
+
+func drawShadedTriangle(screen []byte, color color, v0, v1, v2 vert) {
+	// First sort the vertices so p0 is the lowest point and p2 the highest.
+	// This sorting also guarantees that p0 -> p2 is always a "tall" side.
+	// The other two sides are "short" sides.
+
+	if v1.y < v0.y {
+		v0, v1 = swapVerts(v0, v1)
+	}
+	if v2.y < v0.y {
+		v0, v2 = swapVerts(v0, v2)
+	}
+	if v2.y < v1.y {
+		v1, v2 = swapVerts(v1, v2)
+	}
+
+	// Calculate the sets of x values and h values for each side.
+	x01 := interpolate(v0.y, float64(v0.x), v1.y, float64(v1.x))
+	h01 := interpolate(v0.y, v0.h, v1.y, v1.h)
+
+	x12 := interpolate(v1.y, float64(v1.x), v2.y, float64(v2.x))
+	h12 := interpolate(v1.y, v1.h, v2.y, v2.h)
+
+	x02 := interpolate(v0.y, float64(v0.x), v2.y, float64(v2.x))
+	h02 := interpolate(v0.y, v0.h, v2.y, v2.h)
+
+	// Since x02 is a long side, we don't have to do anything to it.
+	// For the other side, we want to concat x01 and x12.
+	// There is a single value of overlap, so drop the last item from x01.
+	x012 := append(x01[:len(x01)-1], x12...)
+	h012 := append(h01[:len(h01)-1], h12...)
+
+	// Determine which set of x values is the left and which is the right
+	mid := len(x02) / 2
+	xLeft := x02
+	hLeft := h02
+	xRight := x012
+	hRight := h012
+	if x02[mid] >= x012[mid] {
+		xLeft = x012
+		xRight = x02
+		hLeft = h012
+		hRight = h02
+	}
+
+	// Draw horizontal lines from top to bottom
+	drawShadedHorizontalLines(screen, color, v0.y, v2.y, xLeft, xRight, hLeft, hRight)
+}
+
+func drawShadedHorizontalLines(screen []byte, color color, yStart int, yEnd int, leftXs, rightXs, leftHs, rightHs []float64) {
+	for y := yStart; y <= yEnd; y++ {
+		yOffset := y - yStart
+		xLeft := int(leftXs[yOffset])
+		xRight := int(rightXs[yOffset])
+		hVals := interpolate(int(xLeft), leftHs[yOffset], int(xRight), rightHs[yOffset])
+		for x := xLeft; x <= xRight; x++ {
+			shadedColor := scaleColor(color, hVals[x-xLeft])
+			putPixel(screen, shadedColor, int(x), y)
+		}
+	}
+}
+
+func scaleColor(col color, factor float64) color {
+	newR := float64(col.r) * factor
+	newG := float64(col.g) * factor
+	newB := float64(col.b) * factor
+	return color{
+		r: byte(math.Min(255, newR)),
+		g: byte(math.Min(255, newG)),
+		b: byte(math.Min(255, newB)),
+	}
 }
 
 func drawLine(screen []byte, color color, start point, end point) {
@@ -49,7 +133,7 @@ func drawLine(screen []byte, color color, start point, end point) {
 			start, end = swap(start, end)
 		}
 
-		yValues := interpolate(start.x, start.y, end.x, end.y)
+		yValues := interpolate(start.x, float64(start.y), end.x, float64(end.y))
 		for x := start.x; x <= end.x; x++ {
 			putPixel(screen, color, x, int(yValues[x-start.x]))
 		}
@@ -59,7 +143,7 @@ func drawLine(screen []byte, color color, start point, end point) {
 			// Always start at the bottom point
 			start, end = swap(start, end)
 		}
-		xValues := interpolate(start.y, start.x, end.y, end.x)
+		xValues := interpolate(start.y, float64(start.x), end.y, float64(end.x))
 		for y := start.y; y <= end.y; y++ {
 			putPixel(screen, color, int(xValues[y-start.y]), y)
 		}
@@ -89,9 +173,9 @@ func drawTriangle(screen []byte, color color, p0, p1, p2 point) {
 	}
 
 	// Calculate the sets of x values for each side.
-	x01 := interpolate(p0.y, p0.x, p1.y, p1.x)
-	x12 := interpolate(p1.y, p1.x, p2.y, p2.x)
-	x02 := interpolate(p0.y, p0.x, p2.y, p2.x)
+	x01 := interpolate(p0.y, float64(p0.x), p1.y, float64(p1.x))
+	x12 := interpolate(p1.y, float64(p1.x), p2.y, float64(p2.x))
+	x02 := interpolate(p0.y, float64(p0.x), p2.y, float64(p2.x))
 
 	// Since x02 is a long side, we don't have to do anything to it.
 	// For the other side, we want to concat x01 and x12.
@@ -109,7 +193,6 @@ func drawTriangle(screen []byte, color color, p0, p1, p2 point) {
 
 	// Draw horizontal lines from top to bottom
 	drawHorizontalLines(screen, color, p0.y, p2.y, xLeft, xRight)
-
 }
 
 func drawHorizontalLines(screen []byte, color color, yStart int, yEnd int, leftXs []float64, rightXs []float64) {
@@ -118,6 +201,10 @@ func drawHorizontalLines(screen []byte, color color, yStart int, yEnd int, leftX
 			putPixel(screen, color, int(x), y)
 		}
 	}
+}
+
+func swapVerts(x vert, y vert) (vert, vert) {
+	return y, x
 }
 
 func swap(x point, y point) (point, point) {
@@ -137,16 +224,16 @@ func abs(x int) int {
 //
 // Example: Given the start and end points of a line, return the series of y values
 // calculated by stepping from x start to x end.
-func interpolate(iStart int, dStart int, iEnd int, dEnd int) []float64 {
+func interpolate(iStart int, dStart float64, iEnd int, dEnd float64) []float64 {
 	// If there is only one point
 	if iStart == iEnd {
-		return []float64{float64(dStart)}
+		return []float64{dStart}
 	}
 
 	values := make([]float64, (iEnd-iStart)+1)
 
 	slope := float64(dEnd-dStart) / float64(iEnd-iStart)
-	d := float64(dStart)
+	d := dStart
 
 	for i := iStart; i <= iEnd; i++ {
 		values[(i - iStart)] = d
